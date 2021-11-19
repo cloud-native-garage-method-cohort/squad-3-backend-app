@@ -1,0 +1,71 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: squad-3-backend-pipeline
+spec:
+  workspaces:
+    - name: pipeline-ws
+  params:
+    - name: source-repo
+      type: string
+    - name: image-repo
+      type: string
+    - name: app-name
+      type: string
+    - name: app-namespace
+      type: string
+  tasks:
+    - name: git-clone
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      params:
+        - name: url
+          value: "$(params.source-repo)"
+        - name: revision
+          value: main
+      workspaces:
+        - name: output
+          workspace: pipeline-ws
+    - name: build
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      params:
+        - name: IMAGE
+          value: "$(params.image-repo)"
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+      runAfter:
+        - git-clone
+    - name: create-manifests
+      taskRef:
+        name: backend-create-configuration
+      params:
+        - name: app-name
+          value: "$(params.app-name)"
+        - name: commit
+          value: "$(tasks.build.results.IMAGE_DIGEST)"
+        - name: image-repo
+          value: "$(params.image-repo)"
+        - name: source-repo
+          value: "$(params.source-repo)"
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+      runAfter:
+        - build
+    - name: deploy
+      taskRef:
+        name: deploy
+      params:
+       - name: app-namespace
+         value: "$(params.app-namespace)"
+       - name: manifest
+         value: "$(tasks.create-manifests.results.manifest)"
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+      runAfter:
+        - create-manifests

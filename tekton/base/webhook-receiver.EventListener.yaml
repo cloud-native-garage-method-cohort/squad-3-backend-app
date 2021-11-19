@@ -1,0 +1,12 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: backend-webhook-receiver
+spec:
+  serviceAccountName: webhook-receiver
+  triggers:
+    - template:
+        name: backend-webhook-receiver
+      bindings:
+        - ref: backend-webhook-receiver
+

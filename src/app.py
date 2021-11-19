@@ -20,7 +20,7 @@ def index():
     return jsonify(msg)
 
 
-@app.route("/api/employees", methods=["GET", "POST"])
+@app.route("/employees", methods=["GET", "POST"])
 def employeeEP():
     msg = ""
     if request.method == "GET":

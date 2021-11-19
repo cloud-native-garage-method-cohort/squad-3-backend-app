@@ -1,0 +1,32 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: backend-webhook-receiver
+spec:
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: squad-3-backend-pipeline-
+      spec:
+        serviceAccountName: build-bot
+        pipelineRef:
+          name: squad-3-backend-pipeline
+        params:
+        - name: source-repo
+          value: https://github.com/cloud-native-garage-method-cohort/squad-3-backend-app.git
+        - name: image-repo
+          value: quay.io/tomasz_boczek/squad-3-backend
+        - name: app-name
+          value: backend-app
+        - name: app-namespace
+          value: squad-3-final-app
+        workspaces:
+          - name: pipeline-ws
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi

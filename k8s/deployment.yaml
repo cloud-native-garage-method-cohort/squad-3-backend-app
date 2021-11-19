@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: to-be-replaced-by-kustomization
+  template:
+    metadata:
+      labels:
+        app: to-be-replaced-by-kustomization
+    spec:
+      containers:
+        - name: backend-app
+          image: de.icr.io/solelos-mvp/story-generator:latest
+          ports:
+            - containerPort: 9010
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend
+                  key: DATABASE_URL
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: backend
+                  key: DATABASE_PORT
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend
+                  key: DATABASE_NAME
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend
+                  key: DATABASE_PASSWORD
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend
+                  key: DATABASE_USER

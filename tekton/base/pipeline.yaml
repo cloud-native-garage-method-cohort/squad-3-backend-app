@@ -5,6 +5,8 @@ metadata:
 spec:
   workspaces:
     - name: pipeline-ws
+    - name: gitops-repository
+    - name: git-credentials
   params:
     - name: source-repo
       type: string
@@ -69,3 +71,22 @@ spec:
           workspace: pipeline-ws
       runAfter:
         - create-manifests
+    - name: save-configuration
+      params:
+        - name: manifest
+          value: "$(tasks.create-manifests.results.manifest)"
+        - name: app-name
+          value: "$(params.app-name)"
+        - name: sha
+          value: "$(tasks.git-clone.results.commit)"
+      runAfter:
+        - deploy
+      taskRef:
+        name: save-configuration
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+        - name: target
+          workspace: gitops-repository
+        - name: git-credentials
+          workspace: git-credentials
